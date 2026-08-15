@@ -44,19 +44,22 @@ const registerUser = asyncHandler(async (req, res)=> {
     // check for images, check for avatar
     const avatarLocalPath = req.files?.avatar[0]?.path   //multer
     //const coverImageLocalPath = req.files?.coverImage[0]?.path
-
-    if(!avatarLocalPath){
-        throw new ApiError(400, "avatar is required")
-    }
-    // upload to cloudinary
-
-    const avatar = await uploadOnCloudinary(avatarLocalPath)
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
-
     let coverImageLocalPath;
     if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
         coverImageLocalPath = req.files.coverImage[0].path
     } 
+    if(!avatarLocalPath){
+
+        throw new ApiError(400, "avatar is required")
+    }
+    // upload to cloudinary
+    
+    
+    const avatar = await uploadOnCloudinary(avatarLocalPath)
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+
+    
+    
 
     if (!avatar){
         throw new ApiError(400, "avatar is required")
@@ -77,7 +80,7 @@ const registerUser = asyncHandler(async (req, res)=> {
    )
     
     // check for user creation 
-    if(createdUser){
+    if(!createdUser){
         throw new ApiError(500, "something went wrong while registering the user")
     }
     // return res
@@ -89,11 +92,11 @@ const registerUser = asyncHandler(async (req, res)=> {
 
 const loginUser = asyncHandler(async (req, res)=>{
     //take user data from req body
-
+    console.log("BODY:", req.body);
     const {email,username, password} = req.body
     //username or email
 
-    if(!username || !email){
+    if(!username && !email){
         throw new ApiError(400, "username or email is required")
     }
     // find the user
@@ -118,7 +121,7 @@ const loginUser = asyncHandler(async (req, res)=>{
     httpOnly: true,     //this makes cookies only modifyable by server
     secure: true
    }
-   return refreshToken.status(200)
+   return res.status(200)
    .cookie("accessToken", accessToken, options)
    .cookie("refreshToken", refreshToken, options)
    .json(
